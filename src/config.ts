@@ -10,6 +10,9 @@ const envConfig = readEnvFile([
   'ASSISTANT_HAS_OWN_NUMBER',
   'ONECLI_URL',
   'TZ',
+  'CONTAINER_IMAGE',
+  'SERVER_URL',
+  'MODEL',
 ]);
 
 export const ASSISTANT_NAME =
@@ -42,7 +45,14 @@ export const GROUPS_DIR = path.resolve(PROJECT_ROOT, 'groups');
 export const DATA_DIR = path.resolve(PROJECT_ROOT, 'data');
 
 export const CONTAINER_IMAGE =
-  process.env.CONTAINER_IMAGE || 'nanoclaw-agent:latest';
+  process.env.CONTAINER_IMAGE ||
+  envConfig.CONTAINER_IMAGE ||
+  'nanoclaw-agent:latest';
+
+export const SERVER_URL = process.env.SERVER_URL || envConfig.SERVER_URL || '';
+
+export const MODEL =
+  process.env.MODEL || envConfig.MODEL || 'stable-code:3b-code-q4_0';
 export const CONTAINER_TIMEOUT = parseInt(
   process.env.CONTAINER_TIMEOUT || '1800000',
   10,
