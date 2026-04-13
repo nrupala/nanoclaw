@@ -13,7 +13,9 @@ import {
   DATA_DIR,
   GROUPS_DIR,
   IDLE_TIMEOUT,
+  MODEL,
   ONECLI_URL,
+  SERVER_URL,
   TIMEZONE,
 } from './config.js';
 import { resolveGroupFolderPath, resolveGroupIpcPath } from './group-folder.js';
@@ -260,6 +262,14 @@ async function buildContainerArgs(
 
   // Pass host timezone so container's local time matches the user's
   args.push('-e', `TZ=${TIMEZONE}`);
+
+  // Pass local LLM configuration to container
+  if (SERVER_URL) {
+    args.push('-e', `SERVER_URL=${SERVER_URL}`);
+  }
+  if (MODEL) {
+    args.push('-e', `MODEL=${MODEL}`);
+  }
 
   // OneCLI gateway handles credential injection — containers never see real secrets.
   // The gateway intercepts HTTPS traffic and injects API keys or OAuth tokens.
