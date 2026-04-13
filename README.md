@@ -23,25 +23,31 @@
 
 NanoClaw provides that same core functionality, but in a codebase small enough to understand: one process and a handful of files. Claude agents run in their own Linux containers with filesystem isolation, not merely behind permission checks.
 
-## Quick Start
+## Two Ways to Run NanoClaw
+
+### Option 1: Cloud AI (Regular)
+
+Requires Claude Code account and API key. See above for original setup.
+
+### Option 2: Self-Hosted (This Fork)
+
+Run entirely on your machine with local LLM. No cloud APIs, no subscriptions.
 
 ```bash
-gh repo fork qwibitai/nanoclaw --clone
+# Clone this fork
+git clone https://github.com/nrupala/nanoclaw.git
 cd nanoclaw
-claude
+
+# Install Ollama (https://ollama.ai)
+# Then configure
+cp .env.example .env
+# Edit .env with your settings
+
+# Start
+npm run dev
 ```
 
-<details>
-<summary>Without GitHub CLI</summary>
-
-1. Fork [qwibitai/nanoclaw](https://github.com/qwibitai/nanoclaw) on GitHub (click the Fork button)
-2. `git clone https://github.com/<your-username>/nanoclaw.git`
-3. `cd nanoclaw`
-4. `claude`
-
-</details>
-
-Then run `/setup`. Claude Code handles everything: dependencies, authentication, container setup and service configuration.
+See [docs/SELFHOSTED.md](docs/SELFHOSTED.md) for full setup.
 
 > **Note:** Commands prefixed with `/` (like `/setup`, `/add-whatsapp`) are [Claude Code skills](https://code.claude.com/docs/en/skills). Type them inside the `claude` CLI prompt, not in your regular terminal. If you don't have Claude Code installed, get it at [claude.com/product/claude-code](https://claude.com/product/claude-code).
 
@@ -56,6 +62,7 @@ Then run `/setup`. Claude Code handles everything: dependencies, authentication,
 **Customization = code changes.** No configuration sprawl. Want different behavior? Modify the code. The codebase is small enough that it's safe to make changes.
 
 **AI-native.**
+
 - No installation wizard; Claude Code guides setup.
 - No monitoring dashboard; ask Claude what's happening.
 - No debugging tools; describe the problem and Claude fixes it.
@@ -87,6 +94,7 @@ Talk to your assistant with the trigger word (default: `@Andy`):
 ```
 
 From the main channel (your self-chat), you can manage groups and tasks:
+
 ```
 @Andy list all scheduled tasks across groups
 @Andy pause the Monday briefing task
@@ -119,6 +127,7 @@ Users then run `/add-telegram` on their fork and get clean code that does exactl
 Skills we'd like to see:
 
 **Communication Channels**
+
 - `/add-signal` - Add Signal as a channel
 
 ## Requirements
@@ -139,6 +148,7 @@ Single Node.js process. Channels are added via skills and self-register at start
 For the full architecture details, see the [documentation site](https://docs.nanoclaw.dev/concepts/architecture).
 
 Key files:
+
 - `src/index.ts` - Orchestrator: state, message loop, agent invocation
 - `src/channels/registry.ts` - Channel registry (self-registration at startup)
 - `src/ipc.ts` - IPC watcher and task processing
@@ -177,6 +187,7 @@ ANTHROPIC_AUTH_TOKEN=your-token-here
 ```
 
 This allows you to use:
+
 - Local models via [Ollama](https://ollama.ai) with an API proxy
 - Open-source models hosted on [Together AI](https://together.ai), [Fireworks](https://fireworks.ai), etc.
 - Custom model deployments with Anthropic-compatible APIs
