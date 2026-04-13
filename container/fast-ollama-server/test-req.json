@@ -1,0 +1,5 @@
+{
+  "model": "stable-code:3b-code-q4_0",
+  "messages": [{ "role": "user", "content": "hi" }],
+  "max_tokens": 30
+}
