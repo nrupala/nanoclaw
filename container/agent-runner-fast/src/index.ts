@@ -1,9 +1,11 @@
 /**
- * NanoClaw Agent Runner - Fast Server Version (Fixed stdin)
+ * NanoClaw Agent - Self-contained test mode (reads from file)
  */
 
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
+import http from 'http';
 
 interface ContainerInput {
   prompt: string;
@@ -24,32 +26,83 @@ const SERVER_URL = process.env.SERVER_URL || 'http://localhost:8080';
 const MODEL = process.env.MODEL || 'stable-code:3b-code-q4_0';
 
 async function queryServer(prompt: string): Promise<string> {
-  const response = await fetch(`${SERVER_URL}/v1/chat/completions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: 'You are Andy, a helpful AI assistant.' },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 1024,
-    }),
+  const url = new URL(`${SERVER_URL}/v1/chat/completions`);
+  const isHttps = url.protocol === 'https:';
+  const lib = isHttps ? https : http;
+
+  return new Promise((resolve, reject) => {
+    const req = lib.request(
+      {
+        hostname: url.hostname,
+        port: url.port || (isHttps ? 443 : 80),
+        path: '/v1/chat/completions',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            resolve(json.choices?.[0]?.message?.content || 'No response');
+          } catch {
+            reject(new Error(data));
+          }
+        });
+      },
+    );
+    req.on('error', reject);
+    req.write(
+      JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: 'You are Andy, a helpful AI assistant.' },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 512,
+      }),
+    );
+    req.end();
   });
-
-  if (!response.ok) throw new Error(`Error: ${response.status}`);
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || 'No response';
 }
 
-const inputData = fs.readFileSync('/dev/stdin', 'utf8').trim();
-if (!inputData) {
-  console.error('No input received');
-  process.exit(1);
+// Try reading from /tmp/test-input.json first (mounted file)
+let input = '';
+const testFile = '/tmp/test-input.json';
+if (fs.existsSync(testFile)) {
+  input = fs.readFileSync(testFile, 'utf8');
 }
 
-const config: ContainerInput = JSON.parse(inputData);
+// Fallback: use command-line argument
+if (!input && process.argv.length > 2) {
+  input = process.argv[2];
+}
+
+// Test mode: generate test input file
+if (process.argv.includes('--test')) {
+  const testInput: ContainerInput = {
+    prompt: process.argv.includes('--prompt')
+      ? process.argv[process.argv.indexOf('--prompt') + 1]
+      : 'Say hello in one word',
+    sessionId: 'test-' + Date.now(),
+    groupFolder: 'test',
+    chatJid: 'test',
+    isMain: true,
+  };
+  fs.writeFileSync(testFile, JSON.stringify(testInput));
+  console.log('Test input saved to', testFile);
+  process.exit(0);
+}
+
+if (!input.trim()) {
+  process.exit(0);
+}
+
+const config: ContainerInput = JSON.parse(input);
 const output: ContainerOutput = { status: 'success', result: null };
 
 try {
