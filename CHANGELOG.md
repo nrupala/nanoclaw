@@ -4,6 +4,15 @@ All notable changes to NanoClaw will be documented in this file.
 
 For detailed release notes, see the [full changelog on the documentation site](https://docs.nanoclaw.dev/changelog).
 
+## [Unreleased]
+
+### Added
+- Portfolio certification rollout: PR-flow discipline documented in CONTRIBUTING (draft PR → tests green → owner merges; no direct pushes to `main`; CHANGELOG entry under Unreleased per PR; semver patch/minor bumps; merge commits reference PR numbers; releases tagged `vX.Y.Z`).
+- `NOTICE.md`: MIT license attribution — Copyright (c) 2026 Gavriel (upstream nanoclaw project); this independent copy is maintained by Nrupal Akolkar.
+
+### Changed
+- `package.json` version 1.2.52 → 1.2.53 (patch bump for this certification chore).
+
 ## [1.2.36] - 2026-03-26
 
 - [BREAKING] Replaced pino logger with built-in logger. WhatsApp users must re-merge the WhatsApp fork to pick up the Baileys logger compatibility fix: `git fetch whatsapp main && git merge whatsapp/main`. If the `whatsapp` remote is not configured: `git remote add whatsapp https://github.com/qwibitai/nanoclaw-whatsapp.git`.
